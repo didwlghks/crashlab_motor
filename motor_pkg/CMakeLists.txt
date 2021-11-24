@@ -4,6 +4,7 @@ project(motor_test)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  my_msgs
 )
 
 catkin_package(
