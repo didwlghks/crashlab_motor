@@ -1,23 +1,66 @@
+
+/*
+#include<ros/ros.h>
+#include<my_msgs/RequestOfMove.h>
+
+void NumberCallback(const my_msgs::RequestOfMove &msg){
+    ROS_INFO("sub MR: %d, ML: %d\n", msg.MR, msg.ML);
+}
+
+int main(int argc, char** argv){
+    ros::init(argc, argv, "sub_node");
+    ros::NodeHandle nh;
+
+    ros::Subscriber sub_number = nh.subscribe("/Topic/Move", 10, NumberCallback);
+    
+    ros::spin();
+}
+
+
+*/
+
 #include <ros/ros.h>
 #include <motor_test/motor_node.h>
 #include <motor_test/pid.h>
+#include <my_msgs/CameraData.h>
 #include <stdio.h>
+
+#define X_CENTER_1 -100
+#define X_CENTER_2 100
+
+float x_point = 0;
+float size = 0;
+int sequence = 1;
+
+void NumberCallback(const my_msgs::CameraData &msg){
+    x_point = msg.x;
+    size = msg.size;
+}
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "motor_node");
   ros::NodeHandle nh;
   Initialize();
- ros::Rate loop_rate(Control_cycle);
+  ros::Rate loop_rate(Control_cycle);
 
-  while(ros::ok())
+  while(ros::ok() && sequence == 1)
   {
-    //Motor_Controller(1, true, 100);
-    //Motor_Controller(2, true, 100);
-    //Accel_Controller(1, true, 100);
-    //Accel_Controller(2, true, 100);
-    //Switch_Turn_Example(100, 100);
-    //Theta_Distance(180,100,30,110);
+    ros::Subscriber sub_number = nh.subscribe("/camera/topic", 10, NumberCallback); //camera topic sub
+    
+    Motor_Controller(1, true, 50);
+    Motor_Controller(2, true, 50);
+    
+    if(x_point <= X_CENTER_1)
+    {
+      //turn left
+    }
+    
+    else if(x_point >= X_CENTER_2)
+    {
+      //tun right
+    }
+    
     Motor_View();
     ros::spinOnce();
     loop_rate.sleep();
@@ -26,6 +69,12 @@ int main(int argc, char** argv)
   Motor_Controller(2, true, 0);
   return 0;
 }
+
+//Accel_Controller(1, true, 100);
+//Accel_Controller(2, true, 100);
+//Switch_Turn_Example(100, 100);
+//Theta_Distance(180,100,30,110);
+
 /*
 int state = 0;
 //0 : 홍보 종료상태
