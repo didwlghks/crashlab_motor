@@ -1,35 +1,24 @@
 
-/*
-#include<ros/ros.h>
-#include<my_msgs/RequestOfMove.h>
-
-void NumberCallback(const my_msgs::RequestOfMove &msg){
-    ROS_INFO("sub MR: %d, ML: %d\n", msg.MR, msg.ML);
-}
-
-int main(int argc, char** argv){
-    ros::init(argc, argv, "sub_node");
-    ros::NodeHandle nh;
-
-    ros::Subscriber sub_number = nh.subscribe("/Topic/Move", 10, NumberCallback);
-    
-    ros::spin();
-}
-
-
-*/
-
 #include <ros/ros.h>
 #include <motor_test/motor_node.h>
 #include <motor_test/pid.h>
 #include <my_msgs/CameraData.h>
+#include <my_msgs/SensorData.h>
+#include <my_msgs/Signal.h>
 #include <stdio.h>
 
 #define X_CENTER_1 -100
 #define X_CENTER_2 100
+#define BIG_SIZE 500
+#define SENSOR_DANGER 50
 
 float x_point = 0;
 float size = 0;
+
+float FrontSensor = 0;
+float LeftSensor = 0;
+float RightSensor = 0;
+
 int sequence = 1;
 
 void NumberCallback(const my_msgs::CameraData &msg){
@@ -37,28 +26,62 @@ void NumberCallback(const my_msgs::CameraData &msg){
     size = msg.size;
 }
 
+/*
+void NumberCallback2(const my_msgs::SensorData &msg){
+    FrontSensor = msg.front;
+    LeftSensor = msg.left;
+    RightSensor = msg.right;
+}
+*/
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "motor_node");
   ros::NodeHandle nh;
   Initialize();
+  ros::Publisher pub_number = nh.advertise<my_msgs::Signal>("/signal/topic",10); // give signal to Display
   ros::Rate loop_rate(Control_cycle);
+  my_msgs::Signal signal;
 
-  while(ros::ok() && sequence == 1)
+  while(ros::ok())
   {
-    ros::Subscriber sub_number = nh.subscribe("/camera/topic", 10, NumberCallback); //camera topic sub
-    
-    Motor_Controller(1, true, 50);
-    Motor_Controller(2, true, 50);
-    
-    if(x_point <= X_CENTER_1)
+    while(sequence == 1)
     {
-      //turn left
+        ros::Subscriber sub_number = nh.subscribe("/camera/topic", 10, NumberCallback); //camera topic sub
+    
+        Motor_Controller(1, true, 50);
+        Motor_Controller(2, true, 50);
+    
+        if(x_point <= X_CENTER_1)
+        {
+            //turn left
+        }
+    
+        else if(x_point >= X_CENTER_2)
+        {
+            //tun right
+        }
+        
+        if(size >= BIG_SIZE)
+        {
+            Motor_Controller(1, true, 0);
+            Motor_Controller(2, true, 0);
+            if(FrontSensor < SENSOR_DANGER)
+            {
+                sequence = 2;
+                break;
+            }
+        }
     }
-    
-    else if(x_point >= X_CENTER_2)
+      
+    while(sequence == 2)
     {
-      //tun right
+        pub_number.publish(signal);
+        if() //end signal input
+        {
+            sequence = 1;
+            break;
+        }
     }
     
     Motor_View();
@@ -74,48 +97,3 @@ int main(int argc, char** argv)
 //Accel_Controller(2, true, 100);
 //Switch_Turn_Example(100, 100);
 //Theta_Distance(180,100,30,110);
-
-/*
-int state = 0;
-//0 : 홍보 종료상태
-//1 : 홍보 진행중
-
-
-
-While(ros::ok) 
-
-if (사람의 좌표가 안 들어올때 && state == 0)
-{
-제자리회전 // 기본주행 어떻게 할지, 정지해있을지?
-} 
-
-// 여러 사람중 한 사람 선택했을때부터 시작해서 그 사람 바운딩박스값만 줄 수 있는지?
-
-
-While(통신으로 사람의 좌표가 들어올때 && state == 0)
-{
-  if (사람의 위치가 카메라상의 왼편일때)
-  오른쪽바퀴 턴 
-
-  if (사람의 위치가 카메라상의 오른편일 때)
-  왼쪽바퀴 턴 
-
-  if (사람의 위치가 카메라상의 가운데편)
-  직진 
-
-  if (바운딩 박스의 크기가 기준값이상 커졌을때 or 초음파센서로 근접인식 시) 
-
-모터정지 
-
-// 바운딩박스 크기가 기준값보다 크다 = 사람에게 근접했다 -> 모터정지 필요 
-
-//초음파센서값으로 충돌고려해서 모터정지? 장애물 우회 필요 -> 장애물 우회코드 함수로 만들기! 
-
-  if (일정시간동안 바운딩박스 크기가 기준값보다 클때) //사람에 근접 도달 후 사람이 도망 안가면 홍보진행 
-
-모터정지 후 디스플레이 출력신호주기?
-state = 1;
-break; 
-
-홍보 과정 종료시 신호받아서 state = 0으로 초기화해줘야
-  */
