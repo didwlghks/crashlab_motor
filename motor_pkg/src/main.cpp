@@ -9,7 +9,7 @@
 #define X_CENTER_1 -100
 #define X_CENTER_2 100
 #define BIG_SIZE 500
-#define SENSOR_DANGER 50
+#define SENSOR_LIMIT 50
 
 float x_point = 0;
 float size = 0;
@@ -19,34 +19,40 @@ float LeftSensor = 0;
 float RightSensor = 0;
 
 int sequence = 1;
+int signal = 0;
 
-void NumberCallback(const my_msgs::CameraData &msg){
+void CamDataCallback(const my_msgs::CameraData &msg){
     x_point = msg.x;
     size = msg.size;
 }
 
-/*
-void NumberCallback2(const my_msgs::SensorData &msg){
+void SensorDataCallback(const my_msgs::SensorData &msg){
     FrontSensor = msg.front;
     LeftSensor = msg.left;
     RightSensor = msg.right;
 }
-*/
+
+void SignalDataCallback(const my_msgs::SignalData &msg){
+    signal = msg.signal;
+}
+
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "motor_node");
   ros::NodeHandle nh;
   Initialize();
-  ros::Publisher pub_number = nh.advertise<my_msgs::Signal>("/signal/topic",10); // give signal to Display
+  ros::Publisher signal_pub = nh.advertise<my_msgs::SignalData>("/signal/topic",10); // give signal to Display
   ros::Rate loop_rate(Control_cycle);
   my_msgs::Signal signal;
 
   while(ros::ok())
   {
+    ros::Subscriber sensor_sub = nh.subscribe("/sensor/topic", 10, SensorDataCallback);
+      
     if(sequence == 1)
     {
-        ros::Subscriber sub_number = nh.subscribe("/camera/topic", 10, NumberCallback); //camera topic sub
+        ros::Subscriber camera_sub = nh.subscribe("/camera/topic", 10, CamDataCallback); //camera topic sub
     
         Motor_Controller(1, true, 50);
         Motor_Controller(2, true, 50);
@@ -65,7 +71,7 @@ int main(int argc, char** argv)
         {
             Motor_Controller(1, true, 0);
             Motor_Controller(2, true, 0);
-            if(FrontSensor < SENSOR_DANGER)
+            if(FrontSensor < SENSOR_LIMIT)
             {
                 pub_number.publish(signal);
                 sequence = 2;
@@ -76,8 +82,8 @@ int main(int argc, char** argv)
       
     else if(sequence == 2)
     {
-        
-        if() //end signal input
+        ros::Subscriber sensor_sub = nh.subscribe("/sensor/topic", 10, SensorDataCallback);
+        if(signal == 1) //end signal input
         {
             sequence = 1;
         }
