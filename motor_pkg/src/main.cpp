@@ -20,7 +20,7 @@ float LeftSensor = 0;
 float RightSensor = 0;
 
 int sequence = 1;
-int signal = 0;
+int state = 0;
 
 
 void CamDataCallback(const my_msgs::CameraData &msg){
@@ -35,7 +35,7 @@ void SensorDataCallback(const my_msgs::SensorData &msg){
 }
 
 void SignalDataCallback(const my_msgs::SignalData &msg){
-    signal = msg.data;
+    state = msg.data;
 }
 
 
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
     else if(sequence == 2)
     {
         ros::Subscriber signal_sub = nh.subscribe("/signal/topic", 10, SignalDataCallback); //
-        if(signal == 1) //end signal input
+        if(state == 1) //end signal input
         {
             sequence = 1;
         }
