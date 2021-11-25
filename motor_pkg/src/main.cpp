@@ -1,7 +1,6 @@
 
 #include <ros/ros.h>
 #include <motor_test/motor_node.h>
-#include <motor_test/pid.h>
 #include <my_msgs/CameraData.h>
 #include <my_msgs/SensorData.h>
 #include <my_msgs/Signal.h>
