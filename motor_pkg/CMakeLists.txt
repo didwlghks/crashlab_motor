@@ -3,6 +3,7 @@ project(motor_test)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  rospy
   std_msgs
   my_msgs
 )
@@ -10,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES motor_test
-  CATKIN_DEPENDS roscpp std_msgs
+  CATKIN_DEPENDS roscpp rospy std_msgs
   DEPENDS system_lib
 )
 
