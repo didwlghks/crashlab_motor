@@ -11,6 +11,7 @@
 #define BIG_SIZE 500
 #define SENSOR_LIMIT 50
 
+
 float x_point = 0;
 float size = 0;
 
@@ -20,6 +21,7 @@ float RightSensor = 0;
 
 int sequence = 1;
 int signal = 0;
+
 
 void CamDataCallback(const my_msgs::CameraData &msg){
     x_point = msg.x;
