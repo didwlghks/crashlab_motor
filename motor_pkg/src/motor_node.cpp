@@ -158,19 +158,6 @@ void Motor_Controller(int motor_num, bool direction, int pwm)
 {
   int local_PWM = Limit_Function(pwm);
 	
-	// Kp -  proportional gain
-        // Ki -  Integral gain
-        // Kd -  derivative gain
-        // dt -  loop interval time
-        // max - maximum value of manipulated variable
-        // min - minimum value of manipulated variable
-	
-  PID pid = PID(0.1, 250, -250, 0.1, 0.01, 0.5);
- 
-  double inc = pid.calculate(0, local_PWM)
-  local_PWM += inc;
-  
-
   if(motor_num == 1)
   {
     if(direction == true)
