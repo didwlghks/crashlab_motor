@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
   while(ros::ok())
   {
-    while(sequence == 1)
+    if(sequence == 1)
     {
         ros::Subscriber sub_number = nh.subscribe("/camera/topic", 10, NumberCallback); //camera topic sub
     
@@ -68,19 +68,19 @@ int main(int argc, char** argv)
             Motor_Controller(2, true, 0);
             if(FrontSensor < SENSOR_DANGER)
             {
+                pub_number.publish(signal);
                 sequence = 2;
                 break;
             }
         }
     }
       
-    while(sequence == 2)
+    else if(sequence == 2)
     {
-        pub_number.publish(signal);
+        
         if() //end signal input
         {
             sequence = 1;
-            break;
         }
     }
     
