@@ -6,7 +6,6 @@
 #include <ros/ros.h>
 #include <motor_test/motor_node.h>
 #include <fstream>
-#include <motor_test/pid.h>
 
 void Text_Input(void)
 {
