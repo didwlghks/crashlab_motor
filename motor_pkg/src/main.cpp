@@ -20,7 +20,7 @@ float LeftSensor = 0;
 float RightSensor = 0;
 
 int sequence = 1;
-int state = 0;
+int state = 0; //end signal state
 
 
 void CamDataCallback(const my_msgs::CameraData &msg){
