@@ -86,7 +86,7 @@ int main(int argc, char** argv)
     else if(sequence == 2)
     {
         ros::Subscriber signal_sub = nh.subscribe("/signal/topic", 10, SignalDataCallback); //
-        if(state == 1) //end signal input
+        if(state == 1) //sub end signal
         {
             sequence = 1;
         }
