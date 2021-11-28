@@ -48,7 +48,7 @@ int main(int argc, char** argv)
   Initialize();
   ros::Publisher signal_pub = nh.advertise<my_msgs::SignalData>("/signal/topic",10);
   ros::Rate loop_rate(Control_cycle);
-  my_msgs::SignalData data;
+  my_msgs::SignalData signal;
 
   while(ros::ok())
   {
@@ -93,8 +93,8 @@ int main(int argc, char** argv)
             {
                 Motor_Controller(1, true, 0);
                 Motor_Controller(2, true, 0);
-                data = 1; //to publish SignalData.data to display
-                signal_pub.publish(data);
+                signal.data = 1; //to publish SignalData.data to display
+                signal_pub.publish(signal);
                 sequence++;
             }
         }
