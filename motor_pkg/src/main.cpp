@@ -75,7 +75,7 @@ int main(int argc, char** argv)
             Motor_Controller(2, true, 0);
             if(FrontSensor < SENSOR_LIMIT)
             {
-                data = 1; //publish SignalData.data to display
+                data = 1; //to publish SignalData.data to display
                 signal_pub.publish(data);
                 sequence = 2;
                 break;
@@ -86,9 +86,10 @@ int main(int argc, char** argv)
     else if(sequence == 2)
     {
         ros::Subscriber signal_sub = nh.subscribe("/signal/topic", 10, SignalDataCallback); //
-        if(state == 1) //sub end signal
+        if(state == 1) //if sub display's signal
         {
-            sequence = 1;
+            sequence = 1; //go to first sequence
+            data = 0; //reset
         }
     }
     
