@@ -4,7 +4,7 @@
 #include <my_msgs/CameraData.h>
 #include <my_msgs/SensorData.h>
 #include <my_msgs/SignalData.h>
-#include <stdio.h>
+#include <iostream>
 
 #define X_CENTER_1 -100
 #define X_CENTER_2 100
@@ -12,20 +12,22 @@
 #define SENSOR_LIMIT 50
 
 
-float x_point = 0;
-float size = 0;
+float person_x = 0;
+float person_size = 0; //cam data
 
 float FrontSensor = 0;
 float LeftSensor = 0;
-float RightSensor = 0;
+float RightSensor = 0; //ultrasonic sensor
 
 int sequence = 1;
-int state = 0; //end signal state
+int state = 0; //signal state
 
 
 void CamDataCallback(const my_msgs::CameraData &msg){
-    x_point = msg.x;
-    size = msg.size;
+    person_x = msg.p_x;
+    person_size = msg.p_size;
+    //sign_x = msg.s_x; 
+    //sign_size = msg.s_size; ////////if use sign, activiate
 }
 
 void SensorDataCallback(const my_msgs::SensorData &msg){
@@ -50,49 +52,112 @@ int main(int argc, char** argv)
 
   while(ros::ok())
   {
-    ros::Subscriber sensor_sub = nh.subscribe("/sensor/topic", 10, SensorDataCallback); //sensor topic sub to protect robot
+    ros::Subscriber sensor_sub = nh.subscribe("/sensor/topic", 10, SensorDataCallback); //ultrasonic sensor topic sub
       
     if(sequence == 1)
     {
         ros::Subscriber camera_sub = nh.subscribe("/camera/topic", 10, CamDataCallback); //camera topic sub
-    
-        Motor_Controller(1, true, 50); //go foward normally
-        Motor_Controller(2, true, 50);
-    
-        if(x_point <= X_CENTER_1)
-        {
-            //turn left
-        }
-    
-        else if(x_point >= X_CENTER_2)
-        {
-            //tun right
-        }
         
-        if(size >= BIG_SIZE)
+        if(FrontSensor < SENSOR_LIMIT || LeftSensor < SENSOR_LIMIT || RightSensor < SENSOR_LIMIT)
         {
             Motor_Controller(1, true, 0);
             Motor_Controller(2, true, 0);
+        }
+        
+        if(person_x <= X_CENTER_1)
+        {
+            //turn left
+            Motor_Controller(1, true, 30);
+            Motor_Controller(2, true, 50);
+        }
+    
+        else if(person_x >= X_CENTER_2)
+        {
+            //tun right
+            Motor_Controller(1, true, 50);
+            Motor_Controller(2, true, 30);
+        }
+        
+        else
+        {
+            Motor_Controller(1, true, 50); //go foward normally
+            Motor_Controller(2, true, 50);
+        }
+        
+        if(person_size >= BIG_SIZE)
+        {
+            Motor_Controller(1, true, 20); //move slow not to be bumped
+            Motor_Controller(2, true, 20);
+            
             if(FrontSensor < SENSOR_LIMIT)
             {
+                Motor_Controller(1, true, 0);
+                Motor_Controller(2, true, 0);
                 data = 1; //to publish SignalData.data to display
                 signal_pub.publish(data);
-                sequence = 2;
-                break;
+                sequence++;
             }
         }
     }
       
     else if(sequence == 2)
     {
-        ros::Subscriber signal_sub = nh.subscribe("/signal/topic", 10, SignalDataCallback); //
+        ros::Subscriber signal_sub = nh.subscribe("/signal/topic2", 10, SignalDataCallback); //state = subscribe display's signal
+        
         if(state == 1) //if sub display's signal
         {
-            sequence = 1; //go to first sequence
-            data = 0; //reset
+            state = 0;
+            data = 0; //reset state and data
+            sequence = 1;
         }
     }
+      
+    /*  //////////come back using sign
+    else if(sequence == 2)
+    {
+        ros::Subscriber signal_sub = nh.subscribe("/signal/topic2", 10, SignalDataCallback); //state = subscribe display's signal
+        
+        if(state == 1) //if sub display's signal
+        {
+            state = 0;
+            data = 0; //reset state and data
+            sequence++;
+        }
+    }
+      
+    else if(sequence == 3)
+    {
+       ros::Subscriber camera_sub = nh.subscribe("/camera/topic", 10, CamDataCallback);
+        
+       if(sign_x <= X_CENTER_1)
+        {
+            //turn left
+            Motor_Controller(1, true, 30);
+            Motor_Controller(2, true, 50);
+        }
     
+        else if(sign_x >= X_CENTER_2)
+        {
+            //tun right
+            Motor_Controller(1, true, 50);
+            Motor_Controller(2, true, 30);
+        }
+        
+        else
+        {
+            Motor_Controller(1, true, 50); //go foward normally
+            Motor_Controller(2, true, 50);
+        }
+        
+        if(sign_size >= BIG_SIZE)
+        {
+            Motor_Controller(1, true, 0);
+            Motor_Controller(2, true, 0);
+            sequence = 1;
+        }
+        
+    }
+    */
     Motor_View();
     ros::spinOnce();
     loop_rate.sleep();
