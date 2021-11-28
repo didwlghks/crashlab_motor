@@ -54,15 +54,15 @@ int main(int argc, char** argv)
   {
     ros::Subscriber sensor_sub = nh.subscribe("/sensor/topic", 10, SensorDataCallback); //ultrasonic sensor topic sub
       
+    if(FrontSensor < SENSOR_LIMIT || LeftSensor < SENSOR_LIMIT || RightSensor < SENSOR_LIMIT)
+    {
+        Motor_Controller(1, true, 0);
+        Motor_Controller(2, true, 0);
+    }
+      
     if(sequence == 1)
     {
         ros::Subscriber camera_sub = nh.subscribe("/camera/topic", 10, CamDataCallback); //camera topic sub
-        
-        if(FrontSensor < SENSOR_LIMIT || LeftSensor < SENSOR_LIMIT || RightSensor < SENSOR_LIMIT)
-        {
-            Motor_Controller(1, true, 0);
-            Motor_Controller(2, true, 0);
-        }
         
         if(person_x <= X_CENTER_1)
         {
